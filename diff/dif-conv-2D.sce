@@ -1,4 +1,3 @@
-
 dx=Lx/Nx;
 dy=Ly/Ny;
 
@@ -18,7 +17,7 @@ phi_i=zeros(Ny,Nx); //condtion initiale
 //------------------------------------------
 for i=1:Ny
    for j=1:Nx
-      u = conv(dy*(j-1), dx*(i-1));
+      u = conv(dy*(i-1), dx*(j-1));
       cx(i,j) = u(2);
       cy(i, j) = u(1);
       phi_i(i, j) = phi_0((j-1)*dy,(i-1)*dx);

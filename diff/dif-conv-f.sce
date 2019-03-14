@@ -3,7 +3,7 @@ function dt=calcul_dt(U,dx)
   dt=dx/max(abs(U));
 endfunction
 
-function vort=solveur_1D(vort, Ux, Nx, kappa, dt, dx)
+function vorti=solveur_1D(vorti, Ux, Nx, kappa, dt, dx)
     //----------------------------------------------
     //TODO implémenter une itération temporelle
     // de l'algo 1D codé dans le script dif-conf.sce
@@ -33,8 +33,8 @@ function vort=solveur_1D(vort, Ux, Nx, kappa, dt, dx)
     N(1, Nx) = -kappa*(dt/(dx.^2))
     N(Nx, 1) = -kappa*(dt/(dx.^2))
     N(Nx, Nx) = 1 + 2*kappa*(dt/(dx.^2))
-
-    vort = N \ (M*vort)
+    lama = M*vorti
+    vorti = N \ lama
 
 endfunction
 

@@ -29,4 +29,6 @@ exec("dif-conv-2D.sce")
 //--------------------
 scf;
 // plot([maillage_x maillage_y], [phi_i phi]);
-Sgrayplot(maillage_x, maillage_y, phi);
+plot3d(maillage_y, maillage_x, phi_i);
+scf;
+plot3d(maillage_y, maillage_x, phi)

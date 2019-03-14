@@ -52,7 +52,7 @@ function vort=solveur_2D(vort, Ux, Uy, Nx, Ny, kappa, dt, dx, dy)
     //-----------------------------------------------
    for i= 1:Ny
     temp= vort(i,1:Nx)'
-    vort(i,1:Nx) = solveur_1D(temp, Ux(i,1:Nx), Nx, kappa, dt, dx);
+    vort(i,1:Nx) = solveur_1D(temp, Ux(i,1:Nx), Nx, kappa, dt, dx)';
    end
    // Itération sur les colonnes de vort
    for j=1:Nx

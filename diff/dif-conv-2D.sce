@@ -20,7 +20,7 @@ for i=1:Ny
       u = conv(dy*(i-1), dx*(j-1));
       cx(i,j) = u(2);
       cy(i, j) = u(1);
-      phi_i(i, j) = phi_0((i-1)*dy,(j-1)*dx);
+      phi_i(i, j) = phi_0((j-1)*dy,(i-1)*dx);
    end
 end
 

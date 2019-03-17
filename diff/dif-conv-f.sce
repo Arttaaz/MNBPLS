@@ -34,7 +34,7 @@ function vorti=solveur_1D(vorti, Ux, Nx, kappa, dt, dx)
     N(Nx, 1) = -kappa*(dt/(dx.^2))
     N(Nx, Nx) = 1 + 2*kappa*(dt/(dx.^2))
     lama = M*vorti
-    vorti = N \ lama
+    vorti = umfpack(sparse(N), '\', lama)
 
 endfunction
 

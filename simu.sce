@@ -18,7 +18,11 @@ delta = 0.05
 
 // Initialize vorticity
 function [W] = init_vorticity(y,x)
-    // TODO: initialize vorticity W(x,y)
+   if y <= 0.5 then
+      W = 2*%pi*delta*cos(2*%pi*x) - rho*(1 - tanh(rho*(y-0.25))^2)
+   else
+      W = 2*%pi*delta*cos(2*%pi*x) + rho*(1 - tanh(rho*(0.75 - y))^2)
+   end
 endfunction
 
 
@@ -36,21 +40,21 @@ function plot_fields(W, Ux, Uy, iteration)
     Sgrayplot(X, Y, W', colminmax=cmm)
     xlabel("x")
     ylabel("y")
-    
+
     subplot(132)
     title("Ux(x,y)")
     colorbar(min(Ux), max(Ux), cmm)
     Sgrayplot(X, Y, Ux', colminmax=cmm)
     xlabel("x")
     ylabel("y")
-    
+
     subplot(133)
     title("Uy(x,y)")
     colorbar(min(Uy), max(Uy), cmm)
     Sgrayplot(X, Y, Uy', colminmax=cmm)
     xlabel("x")
     ylabel("y")
-        
+
     figname = sprintf("ite_%04d.png", iteration)
     xs2png(fig, figname)
 endfunction
@@ -61,11 +65,12 @@ function plot_isocontours(W, figname)
     if (t~=0.80) & (t~=1.20) then
         return
     end
-    
+
     fig = scf(1)
     clf()
 
     // TODO: display the isocontours
+    contourf(Y, X, W, -70:10:70)
 
     figname = sprintf("isocontours_%f.png", t)
     xs2png(fig, figname)
@@ -74,9 +79,9 @@ endfunction
 
 // Load the Poisson solver and the advection-diffusion solver
 dir  = get_absolute_file_path("simu.sce")
-file = dir+"poisson/poisson.sce" 
+file = dir+"poisson/poisson.sce"
 exec(file, -1)
-file = dir+"diff/dif-conv-f.sce" 
+file = dir+"diff/dif-conv-f.sce"
 exec(file, -1)
 
 // Figure setup (fig0 = fields, fig1 = isocontours)
@@ -89,8 +94,12 @@ ite = 0
 W = feval(Y, X, init_vorticity)
 while t<T
     // TODO: compute velocity from vorticity
+    [Ux, Uy] = poisson_curl_2d(W, Nx, Ny, Lx, Ly)
+    Ux = real(Ux)
+    Uy = real(Uy)
 
     // TODO: compute new timestep from stability criteria
+    dt = min([calcul_dt(Ux, dx), calcul_dt(Uy, dy)])
     if (t<0.80) & (t+dt>0.80) then
         dt = 0.80-t
     elseif (t<1.20) & (t+dt>1.20) then
@@ -98,17 +107,22 @@ while t<T
     elseif (t+dt>T) then
         dt = T-t
     end
-    
+
     printf("\niteration %i, from t=%f to t=%f", ite, t, t+dt)
     plot_fields(W,Ux,Uy,ite)
     plot_isocontours(W,t)
-    
+
     // TODO: advection-diffusion on vorticity
- 
+    W = solveur_2D(W, Ux, Uy, Nx, Ny, nu, dt, dx, dy)
     // TODO: update t and ite
+    t = t + dt
+    ite = ite + 1
 end
 plot_fields(W,Ux,Uy,ite)
 plot_isocontours(W,t)
 
 printf("\nDone in %i iterations!\n", ite)
 exit(0)
+
+//68 itérations Q.13
+//126 itérations Q.14

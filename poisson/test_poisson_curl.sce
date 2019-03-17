@@ -1,39 +1,54 @@
 
 // Initialise f(x,y)
-function [f]=init_field(y,x)
-    f = sin(2*%pi*x) * sin(2*%pi*y)
+function [w]=init_field(y,x)
+    w = 8*%pi^2*cos(2*%pi*x) * cos(2*%pi*y)
 endfunction
 
 
 // Solution de référence du problème laplacien(psi(x,y)) = f(x,y)
-function [ref]=solution_field(y,x)
-    ref = (-1)/(8*%pi^2) * init_field(y, x)
+function [Ux]=solution_ux(y,x)
+    Ux = (-2*%pi)*cos(2*%pi*x)*sin(2*%pi*y)
 endfunction
 
+function [Uy]=solution_uy(y,x)
+   Uy = (2*%pi)*sin(2*%pi*x)*cos(2*%pi*y)
+endfunction
 
 // Affichage de la fonction f, de la solution de référence et
 // de la solution obtenue, ainsi que de l'erreur commise
 // F   = f(x,y)         -- fonction testée
 // Ref = Psi_alpha(x,y) -- solution analytique
 // Psi = Psi_star(x,y)  -- solution du solveur
-function plot_error(F, Ref, Psi)
+function plot_error(W, Ux_ref, Ux, Uy_ref, Uy)
     fig = gcf()
-    subplot(221)
-    title("F")
-    plot3d(Y, X, F)
-    subplot(222)
-    title("100 * Ref")
-    plot3d(Y, X, 100*Ref)
+    subplot(421)
+    title("W")
+    plot3d(Y, X, W)
+    subplot(423)
+    title("Ref Ux")
+    plot3d(Y, X, Ux_ref)
     colorbar()
-    subplot(223)
-    title("100 * Psi")
-    plot3d(Y, X, 100*Psi)
+    subplot(425)
+    title("Ux")
+    plot3d(Y, X, Ux)
     colorbar()
-    subplot(224)
-    title("1e17 * Err")
-    plot3d(Y, X, 1e17*abs(Ref - Psi))
+    subplot(427)
+    title("1e14 * Err Ux")
+    plot3d(Y, X, 1e14*abs(Ux_ref - Ux))
     colorbar()
-    xs2png(fig, "poisson_error.png")
+    subplot(424)
+    title("Ref Uy")
+    plot3d(Y, X, Uy_ref)
+    colorbar()
+    subplot(426)
+    title("Uy")
+    plot3d(Y, X, Uy)
+    colorbar()
+    subplot(428)
+    title("1e14 * Err Uy")
+    plot3d(Y, X, 1e14*abs(Uy_ref - Uy))
+    colorbar()
+    xs2png(fig, "poisson_error2.png")
 endfunction
 
 
@@ -49,35 +64,38 @@ function test_poisson(Lx, Ly, Nx, Ny)
     Y = linspace(0.0, Ly*(Ny-1)/Ny, Ny)
 
     printf("\n\n  Initializing field F(x,y).")
-    F   = feval(Y, X, init_field)
+    W   = feval(Y, X, init_field)
 
     printf("\n  Initializing reference solution Ref(x,y).")
-    Ref = feval(Y, X, solution_field)
+    Ux_ref = feval(Y, X, solution_ux)
+    Uy_ref = feval(Y, X, solution_uy)
 
-    dir  = get_absolute_file_path("test_poisson.sce")
+    dir  = get_absolute_file_path("test_poisson_curl.sce")
     file = dir+"poisson.sce"
     printf("\n\n  Loading poisson_2d function from file %s%s%s.", char(39), file, char(39))
     exec(file, -1)
 
     printf("\n\n  Computing Poisson solution Psi(x,y).")
-    Psi = poisson_2d(F, Nx, Ny, Lx, Ly)
+    [Ux, Uy] = poisson_curl_2d(W, Nx, Ny, Lx, Ly)
 
     printf("\n  Computing error |Psi-Ref|(x,y).")
-    Err = abs(Psi-Ref)
+    Err_ux = abs(Ux-Ux_ref)
+    Err_uy = abs(Uy-Uy_ref)
 
-    file = pwd()+"/poisson_error.png"
+    file = pwd()+"/poisson_error2.png"
     printf("\n\n  Plotting everything to %s%s%s.", char(39), file, char(39))
-    plot_error(F, Ref, Psi)
+    plot_error(W, Ux_ref, Ux, Uy_ref, Uy)
 
     printf("\n\n")
-    mErr = max(Err)
+    mErr_ux = max(Err_ux)
+    mErr_uy = max(Err_uy)
     max_error = 1e-12
 
-    if (mErr > max_error) then
-        printf("  Maximal error is %.10ef, TEST FAILURE (max_error=%.10ef).\n", mErr, max_error)
+    if (mErr_ux > max_error) & (mErr_uy > max_error) then
+        printf("  Maximal error is %.10ef, TEST FAILURE (max_error=%.10ef).\n", max(mErr_ux, mErr_uy), max_error)
         exit(1)
     else
-        printf("  Maximal error is only %.10ef, TEST SUCCESS.\n", mErr)
+        printf("  Maximal error is only %.10ef, TEST SUCCESS.\n", max(mErr_ux, mErr_uy))
         exit(0)
     end
 endfunction

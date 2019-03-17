@@ -11,8 +11,8 @@ Y = linspace(0.0, Ly*(Ny-1)/Ny, Ny)
 
 // Simulation parameters
 T     = 1.50
-nu    = 1e-4
-rho   = 30.0
+nu    = 0.5e-4
+rho   = 100.0
 delta = 0.05
 
 
@@ -59,6 +59,11 @@ function plot_fields(W, Ux, Uy, iteration)
     xs2png(fig, figname)
 endfunction
 
+function f = champ(t, coords)
+   x = Ux(coords(1), coords(2))
+   y = Uy(coords(1), coords(2))
+   f = [x, y]
+endfunction
 
 // Plot isocontours (only at t=0.80 and t=1.20)
 function plot_isocontours(W, figname)
@@ -71,6 +76,11 @@ function plot_isocontours(W, figname)
 
     // TODO: display the isocontours
     contourf(Y, X, W, -70:10:70)
+
+    fig2 = scf(2)
+    fchamp(champ, t, dx*(0:Nx-1), dy*(0:Ny-1))
+    figname = sprintf("fchamp_%f.png", t)
+    xs2png(fig2, figname)
 
     figname = sprintf("isocontours_%f.png", t)
     xs2png(fig, figname)
@@ -124,5 +134,10 @@ plot_isocontours(W,t)
 printf("\nDone in %i iterations!\n", ite)
 exit(0)
 
-//68 itérations Q.13
+fiig = scf(2);
+t = 0.8
+fchamp()
+figname = sprintf("fchamp_%f.png", t)
+xs2png(fig, figname)
+//400 itérations Q.13
 //126 itérations Q.14
